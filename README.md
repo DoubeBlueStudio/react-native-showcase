@@ -2,6 +2,10 @@
 
 the simple app that show some features of React Native.
 
-# Dependencies
+## Dependencies
 
-*
+* react-native-audio-toolkit
+
+* react-native-vector-icons
+
+* react-native-snap-carousel
