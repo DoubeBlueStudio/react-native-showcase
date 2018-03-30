@@ -16,3 +16,5 @@ export const color = {
 };
 
 export { Feature } from "./features";
+
+export { default as AudioDoc } from "./audioDoc";
