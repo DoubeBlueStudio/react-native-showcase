@@ -37,7 +37,7 @@ export default class AudioPlayer extends Component {
       } else {
         let audioDuration = this.audio.getDuration();
         // audioDuration - 1;
-        console.log("audioDuration: ", this._getDisplayTime(audioDuration));
+        // console.log("audioDuration: ", this._getDisplayTime(audioDuration));
         this.setState({
           audioDuration: audioDuration
         });
@@ -54,6 +54,7 @@ export default class AudioPlayer extends Component {
   };
 
   _onSnapToItem = index => {
+    console.log("index: ", index);
     this.setState({ activeIndex: index });
     if (!this.OnValueChange) {
       this.audio.setCurrentTime(AudioDoc[index].start);
@@ -125,7 +126,7 @@ export default class AudioPlayer extends Component {
       <View style={styles.container}>
         <Header title={"Play Audio"} onBack={this._goBack} />
         <SafeAreaView style={styles.body}>
-          <View style={{}}>
+          <View style={{ height: window.height / 2 }}>
             <Carousel
               ref={c => (this.carousel = c)}
               layout={"tinder"}
@@ -206,6 +207,7 @@ const styles = StyleSheet.create({
   },
   itemText: {
     width: window.width,
+    height: window.height / 2,
     lineHeight: 36,
     padding: 20,
     textAlign: "justify",
