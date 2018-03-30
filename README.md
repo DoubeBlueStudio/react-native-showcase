@@ -4,7 +4,7 @@ the simple app that show some features of React Native.
 
 ## Dependencies
 
-* react-native-audio-toolkit
+* react-native-sound
 
 * react-native-vector-icons
 
