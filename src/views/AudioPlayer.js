@@ -12,38 +12,20 @@ import {
 import { Icon, window, color, AudioDoc } from "../utils";
 import { Header } from "../components";
 import Carousel, { Pagination } from "react-native-snap-carousel";
-import Sound from "react-native-sound";
+import Vedio from "react-native-video";
 
 export default class AudioPlayer extends Component {
   state = {
+    finish: false,
+    isPause: true,
     activeIndex: 0,
     currentTime: 0,
-    audioDuration: 0,
     controlIcon: "control-play"
   };
 
-  componentWillMount() {
-    this._createAudio();
-  }
+  componentWillMount() {}
 
-  componentDidMount() {}
-
-  _createAudio = () => {
-    Sound.setCategory("Playback");
-    this.audio = new Sound("example.mp3", Sound.MAIN_BUNDLE, err => {
-      if (err) {
-        console.log("failed to load the sound", error);
-        return;
-      } else {
-        let audioDuration = this.audio.getDuration();
-        // audioDuration - 1;
-        // console.log("audioDuration: ", this._getDisplayTime(audioDuration));
-        this.setState({
-          audioDuration: audioDuration
-        });
-      }
-    });
-  };
+  componentWillUnmount() {}
 
   _goBack = () => {
     this.props.navigation.goBack();
@@ -54,25 +36,21 @@ export default class AudioPlayer extends Component {
   };
 
   _onSnapToItem = index => {
-    console.log("index: ", index);
     this.setState({ activeIndex: index });
     if (!this.OnValueChange) {
-      this.audio.setCurrentTime(AudioDoc[index].start);
+      this.player.seek(AudioDoc.meta[index].start);
     }
     this.OnValueChange = false;
   };
 
   _onValueChange = val => {
-    AudioDoc.forEach((item, index) => {
+    AudioDoc.meta.forEach((item, index) => {
       if (val < item.end && val >= item.start) {
+        this.OnValueChange = true;
         this.carousel.snapToItem(index);
       }
     });
-    this.setState(prev => {
-      return { currentTime: val };
-    });
-    this.audio.setCurrentTime(val);
-    this.OnValueChange = true;
+    this.player.seek(val);
   };
 
   _getDisplayTime = val => {
@@ -81,47 +59,30 @@ export default class AudioPlayer extends Component {
       : Math.floor(val / 60) + ":" + Math.round(val % 60);
   };
 
-  _play = () => {
-    if (this.audio.isLoaded()) {
-      if (this.audio.isPlaying()) {
-        this.audio.pause();
-        this.setState({ controlIcon: "control-play" });
-        this.audio.getCurrentTime((sec, isPlay) => {
-          this.setState({ currentTime: sec });
-        });
-      } else {
-        this.audio.play();
-        this._counter();
-        this.setState({ controlIcon: "control-pause" });
-      }
-    }
+  _audioOnLoad = info => {};
+
+  _audioOnEnd = info => {
+    this.setState({ isPause: true, controlIcon: "control-play", finish: true });
   };
 
-  _counter = () =>
-    setTimeout(() => {
-      if (this.audio) {
-        if (this.audio.isPlaying()) {
-          this.audio.getCurrentTime((sec, isPlay) => {
-            if (AudioDoc[this.state.activeIndex].end <= sec - 0.5) {
-              this.carousel.snapToItem(this.state.activeIndex + 1);
-            }
-            this.setState({ currentTime: sec });
-          });
-          this._counter();
-        } else {
-          this.setState({ controlIcon: "control-play" });
-        }
-      }
-    }, 200);
+  _audioOnProgress = info => {
+    this.setState({ currentTime: info.currentTime });
+  };
+
+  _play = () => {
+    if (this.state.finish) {
+      this.player.seek(0);
+    }
+    this.setState(({ isPause }) => {
+      return {
+        isPause: !isPause,
+        controlIcon: !isPause ? "control-play" : "control-pause"
+      };
+    });
+  };
 
   render() {
-    const {
-      activeIndex,
-      status,
-      currentTime,
-      audioDuration,
-      controlIcon
-    } = this.state;
+    const { activeIndex, isPause, currentTime, controlIcon } = this.state;
     return (
       <View style={styles.container}>
         <Header title={"Play Audio"} onBack={this._goBack} />
@@ -129,8 +90,7 @@ export default class AudioPlayer extends Component {
           <View style={{ height: window.height / 2 }}>
             <Carousel
               ref={c => (this.carousel = c)}
-              layout={"tinder"}
-              data={AudioDoc}
+              data={AudioDoc.meta}
               sliderWidth={window.width}
               itemWidth={window.width}
               renderItem={this._renderItem}
@@ -138,7 +98,7 @@ export default class AudioPlayer extends Component {
             />
           </View>
           <Pagination
-            dotsLength={AudioDoc.length}
+            dotsLength={AudioDoc.meta.length}
             activeDotIndex={activeIndex}
             dotStyle={styles.dot}
             inactiveDotOpacity={0.3}
@@ -157,13 +117,13 @@ export default class AudioPlayer extends Component {
                   maximumTrackTintColor={color.grey}
                   disabled={false}
                   minimumValue={0}
-                  maximumValue={audioDuration}
+                  maximumValue={AudioDoc.duration}
                   value={currentTime}
                   step={1}
                   onValueChange={this._onValueChange}
                 />
                 <Text style={styles.timeText}>
-                  {this._getDisplayTime(audioDuration)}
+                  {this._getDisplayTime(AudioDoc.duration)}
                 </Text>
               </View>
               <TouchableOpacity
@@ -175,6 +135,17 @@ export default class AudioPlayer extends Component {
             </View>
           </View>
         </SafeAreaView>
+        <Vedio
+          ref={v => {
+            this.player = v;
+          }}
+          source={AudioDoc.source}
+          paused={isPause}
+          playInBackground={false}
+          onLoad={this._audioOnLoad}
+          onEnd={this._audioOnEnd}
+          onProgress={this._audioOnProgress}
+        />
       </View>
     );
   }

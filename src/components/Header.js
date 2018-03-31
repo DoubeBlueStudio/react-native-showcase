@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center"
   },
-  title: { fontSize: 24, fontWeight: "700", color: color.dark },
+  title: { fontSize: 24, color: color.dark },
   backButton: {
     height: 45,
     width: 45,
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start"
   },
   container: {
-    height: 75,
+    height: Platform.OS === "ios" ? 75 : 55,
     width: window.width,
     backgroundColor: color.light,
     borderBottomWidth: 1,

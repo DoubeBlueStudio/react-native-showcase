@@ -31,7 +31,6 @@ export default class Home extends Component {
   };
 
   render() {
-    console.log("Feature: ", Feature);
     return (
       <View style={styles.container}>
         <Header title={"Showcase"} />
