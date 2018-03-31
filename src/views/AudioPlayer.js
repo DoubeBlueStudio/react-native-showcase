@@ -50,6 +50,7 @@ export default class AudioPlayer extends Component {
         this.carousel.snapToItem(index);
       }
     });
+    this.setState({ currentTime: val });
     this.player.seek(val);
   };
 
@@ -66,12 +67,17 @@ export default class AudioPlayer extends Component {
   };
 
   _audioOnProgress = info => {
+    if (info.currentTime >= AudioDoc.meta[this.state.activeIndex].end - 0.05) {
+      this.OnValueChange = true;
+      this.carousel.snapToNext();
+    }
     this.setState({ currentTime: info.currentTime });
   };
 
   _play = () => {
     if (this.state.finish) {
       this.player.seek(0);
+      this.carousel.snapToItem(0);
     }
     this.setState(({ isPause }) => {
       return {
@@ -145,6 +151,7 @@ export default class AudioPlayer extends Component {
           onLoad={this._audioOnLoad}
           onEnd={this._audioOnEnd}
           onProgress={this._audioOnProgress}
+          progressUpdateInterval={100}
         />
       </View>
     );
