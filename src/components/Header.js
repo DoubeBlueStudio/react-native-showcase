@@ -57,6 +57,7 @@ const styles = StyleSheet.create({
     backgroundColor: color.light,
     borderBottomWidth: 1,
     borderBottomColor: color.grey,
-    flexDirection: "row"
+    flexDirection: "row",
+    zIndex: 10
   }
 });
